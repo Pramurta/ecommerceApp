@@ -14,6 +14,7 @@ class Customer(models.Model):
     passportNumber = models.CharField(max_length=200, primary_key=True)
     email = models.EmailField(unique=True)
     password = models.CharField(validators=[password_validator], max_length=30)
+    delivery_address = models.CharField(max_length=2000, default=None)
 
     
     

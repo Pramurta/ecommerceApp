@@ -1,0 +1,6 @@
+# Ignore .env file
+.env
+
+# Ignore text files
+E commerce data model design.txt
+E-commerce backend architecture.txt

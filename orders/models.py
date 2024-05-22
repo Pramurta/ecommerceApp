@@ -25,7 +25,6 @@ class Order(models.Model):
     order_status = models.CharField(max_length=200, choices=[(status.name, status.value) for status in OrderStatus])
     ordered_at = models.DateTimeField(auto_now_add=True)
     total_amount_paid = models.FloatField()
-    payment_currency = models.CharField(max_length=10)
     delivery_address = models.CharField(max_length=2000)
     payment_status = models.CharField(max_length=50, choices=[(status.name, status.value) for status in PaymentStatus])
 
@@ -35,5 +34,4 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     price = models.FloatField()
-    price_currency = models.CharField(max_length=10)
 

@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 import json
 from django.views.decorators.csrf import csrf_exempt
 
-from products.models import Vendor
+from products.models import Product, Vendor
 # Create your views here.
 
 @csrf_exempt
@@ -43,6 +43,42 @@ def removeVendor(request):
             return JsonResponse({"status": "failure", "message": f"Request failed with error: {str(e)}"},status=500)
     else:
         return JsonResponse({"status": "failure", "message": "Only DELETE requests allowed for delete operations"},status=405)
+    
+
+@csrf_exempt
+def createProduct(request):
+    try:
+        requestBody = json.loads(request.body)
+        product_name = requestBody["product_name"]
+        vendor_id = requestBody["vendor_id"]
+        vendor = get_object_or_404(Vendor, pk=vendor_id)
+        price = requestBody["price"]
+        category = requestBody["category"]
+        product = Product(name=product_name, category=category, price=price, vendor=vendor)
+        product.full_clean()
+        product.save()
+        return JsonResponse({"message": "Product created successfully!"})
+    except Exception as e:
+        return JsonResponse({"message": str(e)})
+    
+@csrf_exempt
+def removeProduct(request):
+    try:
+        requestBody = json.loads(request.body)
+        product_id = requestBody["product_id"]
+        product = get_object_or_404(Product, pk=product_id)
+        product.delete()
+        return JsonResponse({"message": "Product removed successfully!"})
+    except Exception as e:
+        return JsonResponse({"message": str(e)})
+    
+@csrf_exempt
+def editProduct(request):
+    #TODO: add the logic to this function
+    pass
+
+
+
 
     
 

@@ -3,5 +3,6 @@ from django.urls import path
 from users import views
 
 urlpatterns = [
-    path('signup/',views.signup)
+    path('signup/',views.signup),
+    path('addToCart/',views.addToCart)
 ]

@@ -4,5 +4,7 @@ from products import views
 urlpatterns = [
     path('createVendor/',views.createVendor),
     path('editVendor/', views.editVendor),
-    path('removeVendor/', views.removeVendor)
+    path('removeVendor/', views.removeVendor),
+    path('createProduct/',views.createProduct),
+    path('removeProduct/',views.removeProduct)
 ]

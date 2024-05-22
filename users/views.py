@@ -4,8 +4,10 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import get_object_or_404
 
-from users.models import Customer
+from products.models import Product
+from users.models import Cart, Customer
 # Create your views here.
 
 @csrf_exempt
@@ -47,16 +49,28 @@ def signup(request):
         return JsonResponse({"status": "failure", "message": "Only post requests allowed for this endpoint!"},
                              status=405)
     
-# @csrf_exempt
-# def login(request):
-#     if request.method == "POST":
-#         requestBody = json.loads(request.body)
-#         username = requestBody["username"]
-#         password = requestBody["password"]
-#         user = authenticate(request, username=username, password=password)
-#     else:
-#         return JsonResponse({"status": "failure", "message": "Only post requests allowed for this endpoint!"},
-#                              status=405)
+@csrf_exempt
+def addToCart(request):
+
+    try:
+        requestBody = json.loads(request.body)
+        products = requestBody["products"]
+        customer_id = requestBody["customer_id"]
+        customer = get_object_or_404(Customer, pk=customer_id)
+
+        for product in products:
+            product_obj = get_object_or_404(Product,pk=product["id"])
+            quantity = product["quantity"]
+            cart = Cart(customer=customer, product=product_obj, quantity=quantity)
+            cart.full_clean()
+            cart.save()
+        
+        return JsonResponse({"message": "Cart created successfully!"})
+
+    
+    except Exception as e:
+        return JsonResponse({"message": str(e)})
+
     
     
 

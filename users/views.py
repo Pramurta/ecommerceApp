@@ -15,6 +15,7 @@ from django.db import transaction
 # Create your views here.
 
 @csrf_exempt
+@transaction.atomic
 def signup(request):
 
     if request.method == 'POST':
@@ -57,6 +58,7 @@ def signup(request):
             return JsonResponse({"status": "failure",  "message": errors}, status=400)
         
         except Exception as e:
+            transaction.set_rollback(True)
             return JsonResponse({"status": "failure", "message": str(e)}, status=500)
     
     else:
@@ -64,6 +66,7 @@ def signup(request):
                              status=405)
 
 @csrf_exempt
+@transaction.atomic
 def login(request):
     if request.method == 'POST':
         try:
@@ -84,6 +87,7 @@ def login(request):
             except Customer.DoesNotExist:
                 return JsonResponse({"status": "failure", "message": "Invalid username entered"},status=401)
         except Exception as e:
+            transaction.set_rollback(True)
             return JsonResponse({"status": "failure", "message": str(e)}, status=500)
     else:
         return JsonResponse({"status": "failure", "message": "Invalid request method"},status=405)
@@ -103,16 +107,19 @@ def add_to_cart(request):
 
             for product in products:
                 product_obj: Product = get_object_or_404(Product,pk=product["id"])
-                existing_cart = Cart.objects.filter(customer=customer, product=product_obj)
-                if existing_cart.exists():
-                    return JsonResponse({"status": "failure", "message": f"There's an existing cart item of customer: {customer.passportNumber}, with product: {product_obj.name} "})
-                quantity: int = product["quantity"]
-                cart: Cart = Cart(customer=customer, product=product_obj, quantity=quantity)
-                carts.append(cart)
+                existing_cart_qs = Cart.objects.filter(customer=customer, product=product_obj)
+                if existing_cart_qs.exists():
+                    existing_cart: Cart = existing_cart_qs.first()
+                    existing_cart.quantity = product["quantity"]
+                    existing_cart.save()
+                else:
+                    quantity: int = product["quantity"]
+                    cart: Cart = Cart(customer=customer, product=product_obj, quantity=quantity)
+                    carts.append(cart)
 
             Cart.objects.bulk_create(carts)
             
-            return JsonResponse({"status": "success","message": "Carts created successfully!"},status=201)
+            return JsonResponse({"status": "success","message": "Carts created/updated successfully!"},status=201)
 
         except Exception as e:
             transaction.set_rollback(True)
@@ -147,6 +154,20 @@ def remove_from_cart(request):
             transaction.set_rollback(True)
             return JsonResponse({"status": "failure","message": str(e)},status=500)
         
+    else:
+        return JsonResponse({"status": "failure", "message": "Invalid request method"},status=405)
+    
+@csrf_exempt
+@jwt_auth_required
+@transaction.atomic
+def editCart(request):
+    if request.method == 'POST':
+        try:
+            requestBody = json.loads(request.body)
+
+        except Exception as e:
+            transaction.set_rollback(True)
+            return JsonResponse({"status": "failure","message": str(e)},status=500)
     else:
         return JsonResponse({"status": "failure", "message": "Invalid request method"},status=405)
 

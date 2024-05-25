@@ -1,6 +1,6 @@
 from enum import Enum
 from django.db import models
-
+import uuid
 from products.models import Product
 from users.models import Customer
 
@@ -11,6 +11,7 @@ class OrderStatus(Enum):
     SHIPPED = 'SHIPPED'
     AT_SORTING_FACILITY = 'AT_SORTING_FACILITY'
     DELIVERY_ON_THE_WAY = 'DELIVERY_ON_THE_WAY'
+    ORDER_PLACED = 'ORDER_PLACED'
 
 class PaymentStatus(Enum):
     NOT_STARTED = 'NOT_STARTED'
@@ -20,7 +21,7 @@ class PaymentStatus(Enum):
     
 
 class Order(models.Model):
-    order_id = models.UUIDField()
+    order_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     order_status = models.CharField(max_length=200, choices=[(status.name, status.value) for status in OrderStatus])
     ordered_at = models.DateTimeField(auto_now_add=True)
@@ -30,7 +31,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    order_id = models.UUIDField()
+    order_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     price = models.FloatField()

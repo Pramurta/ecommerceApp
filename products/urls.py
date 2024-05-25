@@ -6,5 +6,6 @@ urlpatterns = [
     path('editVendor/', views.editVendor),
     path('removeVendor/', views.removeVendor),
     path('createProduct/',views.createProduct),
-    path('removeProduct/',views.removeProduct)
+    path('editProduct/',views.editProduct),
+    path('removeProduct/',views.removeProduct),
 ]
